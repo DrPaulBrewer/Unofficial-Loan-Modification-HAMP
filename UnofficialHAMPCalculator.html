@@ -1,0 +1,201 @@
+<html>
+<head>
+<!-- Unofficial HAMP Loan Modification Calculator (c) 2010 Dr Paul Brewer  -->
+<!-- This software comes with NO WARRANTY OF ANY KIND. -->
+<!-- This version: July 15, 2010 -->
+
+<!-- Users are warned that the calculations are based on one reading of -->
+<!-- Treasury Supplemental Directive 09-01, and that policy on loan -->
+<!-- modification may change and thereby invalidate calculator results -->
+<!-- Thats one of many reasons why the software comes with NO WARRANTY -->
+<!-- and end users must accept all risks of using the software. -->
+
+<!-- I hereby license my original work in this file to the public under -->
+<!-- Free Software Foundation's GNU General Public License version 3 -->
+
+<!-- The full text of this license can be found at -->
+<!-- http://www.gnu.org/licenses/gpl-3.0.txt -->
+<!--                                                                   -->
+<!-- There is a public syndication link (an IFRAME) to Freddie Mac data -->
+<!-- at about line 80. That code is distributed under the doctrine of -->
+<!-- fair use and Freddie's explicit permission from its website and -->
+<!-- therefore that portion of the code and data is not licensed by the GPL -->
+<!-- but has been included in this file and will be removed from future -->
+<!-- versions of this file upon request by Freddie Mac                  -->
+<!--                                                                   -->
+<!-- Email via Gmail can be addressed to the author -->
+<!-- drpaulbrewer ( gmail ) -->
+
+<title>The Unofficial HAMP Loan Modification Calculator</title>
+<script language="JavaScript" src="prototype.js"></script>
+<script language="JavaScript" src="UnofficialHAMPLib.js"></script>
+<script language="JavaScript">
+function loadCalculator() 
+{
+  $('Steps').hide();
+};
+</script>
+</head>
+<body onLoad='loadCalculator();'>
+<h1>The Unofficial HAMP Loan Modification Calculator</h1>
+<p>Important: All results are guesses for educational purposes only.  There is no warranty for this software or any of its results. Guesstimates provided here are based on independent research of <a target=_blank href="externallinks.html">documents made public by the US Treasury from 2009</a>. Guesstimates may not match official calculations.  Guesstimates do not carry the approval or endorsement of any government agency or bank and should not be used for any official purposes. 
+<p>Web sites for official information include: <a target=_blank href="http://makinghomeaffordable.gov">makinghomeaffordable.gov</a> -- <a target=_blank href="http://www.fanniemae.com">Fannie Mae</a> -- <a target=_blank href="http://www.freddiemac.com">Freddie Mac</a></p>
+<h2>Inputs</h2>
+<table>
+<tr>
+<td>Borrowers combined Monthly Gross Income</td>
+<td>
+<input type=text name=bMoGrossIncome id=bMoGrossIncome value=4000 size=6 />
+</td>
+</tr>
+<tr>
+<td>Unpaid Loan Balance, i.e. what is owed on the home<br />
+(Max Eligibility: up to $729750 for a 1 unit to $1.4M for a 4 unit) 
+</td>
+<td>
+<input type=text name=olUnpaid id=olUnpaid value=250000 size=8 />
+</td>
+</tr>
+<tr>
+<td>Months Remaining on Loan</td>
+<td>
+<input type=text name=olMoRemain id=olMoRemain value=192 size=3 />
+</td>
+</tr>
+<tr>
+<td>Current Interest Rate for Loan in %<br />
+(for ARMs use the reset rate instead of the low fixed/teaser rate)</td>
+<td>
+<input type=text name=olRate id=olRate value=6.5 size=4 />
+</td>
+</tr>
+<tr>
+<td>
+Freddie Mac 30YR FRM Avg rate in %<br />
+Re-enter by hand from the table below, or make a guess at the future
+</td>
+<td>
+<input type=text name=fmCap id=fmCap value=4.5 size=4 />
+</td>
+</tr>
+</table>
+<table>
+<tr>
+<td>
+<iframe
+  SRC="http://www.freddiemac.com/pmms/pmmsthick.html"
+  TITLE="Freddie Mac Weekly PMMS"
+  frameborder="0"
+  align="left"
+  width="185"
+  height="175"
+  scrolling="no">
+</iframe>
+</td>
+<td>
+<font size=-8>
+Freddie Mac copyrighted loan market data provided "as is", under a public syndication policy of Freddie Mac and with no warranty of any kind. 
+<a target=_blank href="http://www.freddiemac.com/pmms/syndication/how_to.html">See how to add Freddie Mac data to your website</a>
+</font>
+</td>
+</tr>
+</table>
+<button onClick="doCalculations()">Click to Calculate/Recalculate</button>
+<div id=Outputs>
+<hr>
+<h2>Outputs</h2>
+<table border=1>
+<tr>
+<td>
+Target monthly payment level
+<br />(Treasury's policy target; <span id=mlTargetAGIPct></span> % of income)
+</td>
+<td>
+$<span id=mlMoTargetPayment></span>
+</td>
+<tr>
+<td>
+Modified Interest Rate (first 5 years)
+</td>
+<td>
+<span id=mlRate1to5></span>%
+</td>
+</tr>
+<tr>
+<td>
+Modified Monthly Loan Payment (first 5 years)
+</td>
+<td>
+$<span id=mlMoPayment1to5>
+</span>
+</td>
+</tr>
+<tr>
+<td>
+Length of Modified Loan (months)
+</td>
+<td>
+<span id=mlMonths>
+</span>
+</td>
+</tr>
+<tr>
+<td>
+Months for which rate changes will occur
+</td>
+<td>
+<span id=mlChangeMonths></span>
+</td>
+</tr>
+<tr>
+<td>New Rates beginning on these months (%)</td>
+<td><span id=mlChangeRates></span></td>
+</tr>
+<tr>
+<td>
+New Monthly Payments ($) beginning on these months
+</td>
+<td>
+<span id=mlChangePayments></span>
+</td>
+</tr>
+<tr>
+<td>
+Balloon payment at end of loan
+</td>
+<td>
+$<span id=mlBalloon></span>
+</td>
+</tr>
+</table>
+<font size=-8> <p>These results are provided "as-is" and with no warranty of any kind, and represent a reasonable guess of how to calculate Treasury Supplemental Directive 09-01 but may not match what Treasury is actually using. Besides rounding and differences in interpretation, they may have changed the rules. <em>Procedures and calculations are subject to change and should not be relied upon for any particular case.  Actual results may vary. If you need advice specific to your case, please consult a legal or financial professional. 
+</em></p></font>
+<div id="Details">
+<button name=Steps onClick="$('Steps').toggle();">Show/Hide Steps</button>
+<div id="Steps">
+<h2>Steps described in Treasury Supplemental Directive 09-01 for implementing HAMP</h2>
+<ol>
+<li><em>Capitalize accrued interest and certain costs. To do this, make sure the unpaid balance includes all unpaid interest and other fees that can be assessed against this loan.  Interestingly, late fees are not to be included in the unpaid balance when making the calculations. (So what happens to the late fees?) </em></li>
+<li><em>Convert ARM loans to fixed rate, fully amortizing loans. Reduce the interest rate from the current rate by 0.125% drops to as low as 2.0% to try to reach the target monthly payment level.  If the resulting rate is below the Freddie Mac 30 YR rate then bump up the interest rate 1.0%/year after year 5 until that rate is reached.  If the resulting rate is higher than the 30YR then keep the rate steady where it is.  </em> 
+</li>
+<li><em>If necessary, extend the term and recalculate as up to a 480 month (40 year) loan </em>
+</li>
+<li>
+<em>If necessary, provide for non interest-bearing principal forebearance to achieve the target monthly mortgage payment ratio, i.e. a non-interest bearing balloon payment. </em>
+</li>
+</ol>
+</div>
+<div id=DetailsStep1>
+</div>
+<div id=DetailsStep2>
+</div>
+<div id=DetailsStep3>
+</div>
+<div id=DetailsStep4>
+</div>
+</div>
+</div>
+<p>Although in some cases the modifications suggested by the Treasury program descriptions look quite good for the distressed homeowners, they may also be bad for the lender. Modifications do <em>not</em> have to be made if computer modelling shows the lender could realize more money through foreclosure or foreclosure alternatives like cash-for-keys.</p>
+<p><a target=_blank href="license.html">Software license information</a></p>
+</body>
+</html>
