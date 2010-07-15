@@ -1,0 +1,81 @@
+Unofficial HAMP Calculator
+(c) Dr Paul Brewer 2010
+License: Free Software Foundation's General Public License (GPL) version 3
+
+GENERAL BACKGROUND
+During the recent credit crisis and recession in the United States, many
+families were unable to make payments on their home loans.  Some borrowers
+strategically defaulted because in some parts of the United States
+a loan is non-recourse, the home value had dropped 30% or more, and the only
+collateral for the loan was the property itself.  Most, however, were victims
+of the economic recession, or unexpected expenses such as medical bills, or
+unable to refinance a subprime high margin adjustable rate loan.  The
+investors in these loans, such as the GSEs Fannie Mae and Freddie Mac, Banks,
+and other large investors, normally expected only a small fraction of the
+loans to default. Usually a defaulted loan results in a foreclosure or
+short sale.  With the number of loans affected, the government decided
+to intervene in the marketplace.   
+
+In response to these developments the government created the Home Affordable
+Modification Program (HAMP), which details a specific algorithm to modify
+an existing mortgage.
+
+The full details of this algorithm are beyond the scope of this version
+of the README file.  
+
+The algorithm is interesting and worthy of independent study
+The UnofficialHAMPCalculator represents such an independent study.
+
+I, Dr Paul Brewer, am a private economist with no ties to the US Government
+or the decision makers who created and implemented the HAMP program. Let's
+make that part clear.  
+
+HAMP ALGORITHM
+
+Keep in mind that this is only one version of the procedure, and not
+the whole procedure.  The policy must be considered as subject to change.
+
+0. The goal of the HAMP program is to lower the loan payment to (31%) of gross 
+income in cases where hardship in making the payments can be
+established.  
+
+First, various costs are added into the loan.  These are things like
+unpaid accumulated interest from the period where the loan was unpaid.
+
+Second, the interest rate of the loan is reduced, to as low as 2% by
+0.125% steps, to attempt to meet the goal payment level.
+
+Third, the length of the loan is increased to as much as 40 years.
+
+Fourth, a balloon payment of non-interest bearing principal is created.
+This is called "principal forebearance".  The investor can also choose
+to forgive some of this principal, but is not required to.  
+
+UNOFFICIAL CALCULATOR IMPLEMENTATION AND USAGE
+
+The calculator is implemented primarily in two files and uses the 
+prototype.js Javascript extension library -- a copy of which is included.
+
+The UnofficialHAMPCalculator.html file contains the "skin" of the calculator.
+
+The UnofficialHAMPLib.js file contains the necessary code to implement
+the calculator.  
+
+Other files are externallinks of documents the calculator was based upon,
+and licensing information.
+
+CONTACT INFORMATION
+
+GMAIL drpaulbrewer if you are interested in assisting with expanding
+the calculator, adapting it for your purposes,  or perhaps partnering
+on some related application with the Unofficial calculator as a throwaway
+prototype.  
+
+I believe people have a right to get independent information about
+how their mortgages may be modified and I have a website, ArmDisarm.com, 
+that I am interested in devoting to benevolent entrepreneurship in this area.
+
+
+
+
+
