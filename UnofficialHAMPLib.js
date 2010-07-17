@@ -143,10 +143,86 @@ function VariableRateLoanPaymentArray(LoanAmt, TermInMonths, startRate, MonthArr
 
 }
 
+function displayIfMapped(D, M){ 
+    D.each(
+	   function(pair){ 
+	       if (M.get(pair.key)){
+		   $(M.get(pair.key)).update(pair.value);
+	       }
+	   }
+	   );
+}
 
-function HAMPguesstimator(Q){
+// VARIABLE NAMING CONVENTIONS
+//
+// Hungarian notation prefixes for variable names: 
+// b - borrower
+// ol - original loan
+// fm - Freddie Mac public data
+// ml - modified loan
+// p - policy
+//
+// expected elements in Q hash (case study or UI inputs)
+// bMoGrossIncome -- borrowers monthly gross income
+// olUnpaid -- original loan unpaid balance
+// olMoRemain -- original loan months remaining
+// olRate -- original loan interest rate
+// fmCap -- freddie mac cap rate (30 yr PMMS rate)
+//
+// A HAMP result hash contains these elements (outputs)
+// all result elements are unformatted strings, should be rounded to nearest dollar for dollar values
+// mlTargetAGIPct
+// mlMoTargetPayment
+// mlRate1to5 -- interest rate first 5 years
+// mlMoPayment1to5 -- modified monthly loan payment first 5 years
+// mlMonths -- term (length) of modified loan in months
+// mlChangeMonths -- months for which rate changes occur -- as a string
+// mlChangeRates -- new rates that take effect on the months above -- as a string
+// mlChangePayments -- new payments that take effect on the months above -- as a string
+// mlBalloon -- balloon payment at the end, if any.  if none, return a zero.
+
+
+function initHAMPanimator(Q,M){
+    var result = $H({});
+    // defaults
+    result.set('mlTargetAGIPct', 31);
+    result.set('mlMoTargetPayment', Math.round(result.get('mlTargetAGIPct')*Q.get('bMoGrossIncome')/100.0));
+    result.set('mlRate1to5',Q.get('olRate'));
+    result.set('mlPayment1to5','');
+    result.set('mlMonths',Q.get('olMoRemain'));
+    result.set('mlChangeMonths','no changes');
+    result.set('mlChangeRates','');
+    result.set('mlChangePayments','');    
+    result.set('mlBalloon',0);
+
+    if (M){ displayIfMapped(result,M); }
+
+    return true;
+}
+
+
+function mergeHAMPfuture(Q, result) {
+    var rate = Number(result.get('mlRate1to5'));
+    if (rate < Q.get('fmCap')){ 
+	var N = Math.floor(Q.get('fmCap') - rate);
+	var MonthArray = $R(0,N).collect(function(x){ return 60+12*x; });
+	var RateArray  = $R(1,N).collect(function(x){ return rate+x; });
+	RateArray.push(Q.get('fmCap'));
+	var AmortLoan = Q.get('olUnpaid') - result.get('mlBalloon');
+	var PaymentChangeArray = VariableRateLoanPaymentArray(AmortLoan, 
+							      result.get('mlMonths'), 
+							      rate, 
+							      MonthArray, 
+							      RateArray).collect(Math.round);
+	result.set('mlChangeMonths',MonthArray.join(' --  '));
+	result.set('mlChangeRates',RateArray.join(' -- '));
+	result.set('mlChangePayments',PaymentChangeArray.join(' -- '));    
+    }
+}	    
+
+function stepHAMPanimator(Q, M){
     //
-    //  HAMPguesstimator implements the procedure described in 
+    //  HAMPanimator implements the procedure described in 
     // Treasury Special Directive 09-01 and which has remained similar
     // in later documents.  
     //
@@ -170,90 +246,90 @@ function HAMPguesstimator(Q){
     // This gets fairly complex, and parts of that model are likely to
     // be hidden, although the govenment has disclosed other parts of it.
     //
-    // Hungarian notation prefixes for variable names: 
-    // b - borrower
-    // ol - original loan
-    // fm - Freddie Mac public data
-    // ml - modified loan
-    //
-    //
-    // expected elements in Q hash (case study or UI inputs)
-    // bMoGrossIncome -- borrowers monthly gross income
-    // olUnpaid -- original loan unpaid balance
-    // olMoRemain -- original loan months remaining
-    // olRate -- original loan interest rate
-    // fmCap -- freddie mac cap rate (30 yr PMMS rate)
-    //
-    // function must return a result hash containing all of these elements (outputs)
-    // all result elements are unformatted strings, should be rounded to nearest dollar for dollar values
-    // mlTargetAGIPct
-    // mlMoTargetPayment
-    // mlRate1to5 -- interest rate first 5 years
-    // mlMoPayment1to5 -- modified monthly loan payment first 5 years
-    // mlMonths -- term (length) of modified loan in months
-    // mlChangeMonths -- months for which rate changes occur -- as a string
-    // mlChangeRates -- new rates that take effect on the months above -- as a string
-    // mlChangePayments -- new payments that take effect on the months above -- as a string
-    // mlBalloon -- balloon payment at the end, if any.  if none, return a zero.
 
-    var result = $H();
+    var result  = $H();
+    var mlMoTargetPayment = Number($(M.get('mlMoTargetPayment')).innerHTML);
+    var mlRate1to5 = Number($(M.get('mlRate1to5')).innerHTML);
+    var mlBalloon = Number($(M.get('mlBalloon')).innerHTML);
 
-    // defaults
-    result.set('mlTargetAGIPct', 31);
-    result.set('mlMoTargetPayment', Math.round(result.get('mlTargetAGIPct')*Q.get('bMoGrossIncome')/100.0));
-    result.set('mlMonths',Q.get('olMoRemain'));
-    result.set('mlChangeMonths','no changes');
-    result.set('mlChangeRates','');
-    result.set('mlChangePayments','');    
-    result.set('mlBalloon',0);
+    result.set('mlRate1to5',mlRate1to5);
+    result.set('mlBalloon',mlBalloon);
 
-    var step2RatesToCheck    = DecreasingRateStepArray(Q.get('olRate'),2.0,0.125);
-    var step2PaymentsToCheck = PaymentArrayForRateArray(step2RatesToCheck, Q.get('olUnpaid'), Q.get('olMoRemain'));
-    var l = step2RatesToCheck.length;
-    var rate = 0.0;
-    var payment = 0.0;
-    for(var j = 0; (j<l) && (rate==0.0) ; ++j){
-	payment = step2PaymentsToCheck[j];
-	if (payment<=result.get('mlMoTargetPayment')){ 
-	    rate = step2RatesToCheck[j];
-	}
-    }
-    if (rate > 0.0){ 
-	result.set('mlRate1to5',rate);
-	result.set('mlMoPayment1to5',Math.round(payment));
+    // check for possibility of rate adjustment
+
+    if ( mlRate1to5 > 2.0 ){
+	mlRate1to5 = roundStep(mlRate1to5-0.125,0.125);
+	result.set('mlRate1to5',mlRate1to5);
 	result.set('mlMonths',Q.get('olMoRemain'));
-    } else {
-	rate = 2.0;
-	result.set('mlRate1to5',rate);
-	result.set('mlMonths',480);
-	var PaymentFor40YearsAt2Pct = StandardLoanPayment(2.0,Q.get('olUnpaid'),480);
-	if (PaymentFor40YearsAt2Pct <= result.get('mlMoTargetPayment')){ 
-	    var m = 480;
-	    for(; m>Q.get('olMoRemain') && StandardLoanPayment(2.0,Q.get('olUnpaid'),m)<result.get('mlMoTargetPayment'); --m){}; 
-	    result.set('mlMoPayment1to5',Math.round(StandardLoanPayment(2.0,Q.get('olUnpaid'),m)));
-	    result.set('mlMonths',m);
-	} else {
-	    var Amortized = Q.get('olUnpaid')*result.get('mlMoTargetPayment')/PaymentFor40YearsAt2Pct;
-	    result.set('mlBalloon',Math.round(Q.get('olUnpaid')-Amortized));
-	    result.set('mlMoPayment1to5',result.get('mlMoTargetPayment'));
-	}
+	var payment = Math.round(StandardLoanPayment(mlRate1to5,
+					  Q.get('olUnpaid'),
+					  Q.get('olMoRemain')
+						    ));
+	result.set('mlMoPayment1to5',payment);
+	mergeHAMPfuture(Q,result);
+	displayIfMapped(result,M);
+	return (payment > mlMoTargetPayment );
     }
-    
-    if (rate < Q.get('fmCap')){ 
-	var N = Math.floor(Q.get('fmCap') - rate);
-	var MonthArray = $R(0,N).collect(function(x){ return 60+12*x; });
-	var RateArray  = $R(1,N).collect(function(x){ return rate+x; });
-	RateArray.push(Q.get('fmCap'));
-	var AmortLoan = Q.get('olUnpaid') - result.get('mlBalloon');
-	var PaymentChangeArray = VariableRateLoanPaymentArray(AmortLoan, result.get('mlMonths'), rate, MonthArray, RateArray).collect(Math.round);
-	result.set('mlChangeMonths',MonthArray.join(' --  '));
-	result.set('mlChangeRates',RateArray.join(' -- '));
-	result.set('mlChangePayments',PaymentChangeArray.join(' -- '));    
-    }	
+
+    // check for possibility of length adjustment
+
+    var mlMonths = Number($(M.get('mlMonths')).innerHTML);
+    result.set('mlMonths',mlMonths);	
+
+
+    if ( mlMonths < 480 ){ 
+	++mlMonths;
+	result.set('mlMonths',mlMonths);
+	var payment = Math.round(StandardLoanPayment(mlRate1to5,
+					  Q.get('olUnpaid'),
+					  mlMonths
+						    ));
+	result.set('mlMoPayment1to5',payment);
+	mergeHAMPfuture(Q,result);
+	displayIfMapped(result,M);
+	return (payment  > mlMoTargetPayment );
+    }
+
+
+    if (mlBalloon < Q.get('olUnpaid')) {
+	var Bstep = Math.round(0.001*Number(Q.get('olUnpaid')));
+	mlBalloon = mlBalloon + Bstep;
+	result.set('mlBalloon',mlBalloon);
+	var payment = Math.round(StandardLoanPayment(mlRate1to5, Q.get('olUnpaid') - mlBalloon, mlMonths));
+	result.set('mlMoPayment1to5',payment);
+	mergeHAMPfuture(Q,result);
+	displayIfMapped(result,M);
+	return (payment > mlMoTargetPayment );
+    }
+   	
+    return false; 
+}
+
+function HAMPshowAnimation(Q){ 
+    var M = $H();
+    ['mlTargetAGIPct',
+     'mlMoTargetPayment',
+     'mlRate1to5',
+     'mlMoPayment1to5',
+     'mlMonths',
+     'mlChangeMonths',
+     'mlChangeRates',
+     'mlChangePayments',
+     'mlBalloon'].each(function(s){M.set(s,s)});
+
+    initHAMPanimator(Q,M);
+
+    new PeriodicalExecuter(
+			   function(pe){
+			       var nomore = !(stepHAMPanimator(Q,M));
+			       if (nomore) pe.stop();
+			   },
+			   0.25
+			   );
+
+}
 	    
 
-    return result;
-}
 
 function doCalculations(){
     // used with a particular UI as the event listener for pushing
@@ -268,8 +344,8 @@ function doCalculations(){
     // to go in the Q array (or was that vice-versa, lol)
     //
     // now calculate the HAMP results
-    var R = HAMPguesstimator(Q);
-    //
-    R.each(function(pair){$(pair.key).update(pair.value)});
     $('Outputs').show();
+    var R = HAMPshowAnimation(Q);
+    //
+
 }
