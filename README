@@ -2,6 +2,7 @@ Unofficial HAMP Calculator
 (c) Dr Paul Brewer 2010
 License: Free Software Foundation's General Public License (GPL) version 3
 
+
 GENERAL BACKGROUND
 During the recent credit crisis and recession in the United States, many
 families were unable to make payments on their home loans.  Some borrowers
@@ -42,6 +43,11 @@ established.
 First, various costs are added into the loan.  These are things like
 unpaid accumulated interest from the period where the loan was unpaid.
 
+[In the case of principal reduction, the principal reduction occurs
+here, before the 2nd and 3rd steps.  If the principal reduction is
+more than 5% of the Unpaid Balance, the second and third steps can
+be reversed (Lender's Variation)]
+
 Second, the interest rate of the loan is reduced, to as low as 2% by
 0.125% steps, to attempt to meet the goal payment level.
 
@@ -56,13 +62,18 @@ UNOFFICIAL CALCULATOR IMPLEMENTATION AND USAGE
 The calculator is implemented primarily in two files and uses the 
 prototype.js Javascript extension library -- a copy of which is included.
 
-The UnofficialHAMPCalculator.html file contains the "skin" of the calculator.
+The skin.html file contains the "skin" of the calculator.
 
-The UnofficialHAMPLib.js file contains the necessary code to implement
+The UnofficialHampLib2.js file contains the Javascript program code to implement
 the calculator.  
 
-Other files are externallinks of documents the calculator was based upon,
-and licensing information.
+I am making these files are made available under the Free Software Foundation's 
+GNU General Public License version 3.0. However, that does not mean anyone
+can do anything with the files.  Please read the license to understand
+what is permitted. For example, you may NOT modify this calculator and turn
+the result into proprietary software where you control who can further
+modify it or redistribute it or see the source code.  That an
+example of something not permitted. For full details, see the license.
 
 CONTACT INFORMATION
 
