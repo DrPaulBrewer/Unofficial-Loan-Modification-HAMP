@@ -117,31 +117,6 @@ UHC = function(){
 		return FoverP(Rate, Month) * LoanAmt - FoverA(Rate, Month) * MonthlyPayment;
 	}
 
-	function PaymentArrayForRateArray(RateTable, LoanAmt, TermInMonths) {
-		// this holds the loan amount and length of the loan constant
-		// and creates as output a table of what the payments would be
-		// given as input a table of alternative rates
-		// the rate is held constant for the life of the loan in this case
-		// and the payment output provides a way to compare loans with different rates
-		return RateTable.collect(function(r) {
-			return StandardLoanPayment(r, LoanAmt, TermInMonths)
-		});
-	}
-
-	function DecreasingRateStepArray(maxRate, minRate, step) {
-		// returns an array consisting of maxRate,maxRate-step,...,minRate
-		// part of the HAMP procedures involve lowering the rate
-		// on a loan by 0.125% steps until it becomes affordable
-		// this facilitates that operation
-		var roundedMaxRate = roundStep(maxRate, step);
-		var roundedMinRate = roundStep(minRate, step);
-		var steps = Math.round((roundedMaxRate - roundedMinRate) / step);
-		var rateTable = $R(0, steps).collect(function(n) {
-			return roundedMaxRate - n * step
-		});
-		return rateTable;
-	}
-
 	function VariableRateLoanPaymentArray(LoanAmt, TermInMonths, startRate, MonthArray, RateArray) {
 		// This calculates a payment array for a single complex loan.
 		// The payment array is a sparse array and shows the changes in payments.
@@ -225,7 +200,7 @@ UHC = function(){
 	
 	function readQ(){
 		elementsQ().each(function(el){
-		    if (el.type === "text"){ 
+		    if ((el.type === "text") || (el.type === "hidden")){ 
 			q[el.id]=numerize(el.value);
 		    } else if (el.type === "checkbox"){
 			q[el.id]=(el.checked)?1:0;
@@ -348,13 +323,14 @@ UHC = function(){
 	
 	function startAnimation(){
 		init();
+	    var frameDelay = (q.frameDelay)? q.frameDelay: 0.2;
 		new PeriodicalExecuter(function(pe){ 
 		    if ( loanIsAffordable() ||  (!doAnimationStep())){ 
 			ml.mlCalculatorStep = 'Finished calculations -- Final result';
 			pe.stop(); 
 		    }
 		    writeML();
-		}, 0.2);		
+		}, frameDelay);		
 	}
 	
 	return {
