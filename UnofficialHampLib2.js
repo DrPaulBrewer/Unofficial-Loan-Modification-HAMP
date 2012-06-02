@@ -54,6 +54,7 @@ UHC = function(){
 	
 	var ml = {};
 	var q = {};
+    var animationRunning = 0;
 	
 	function numerize(x){ var xx=1*x; return (isNaN(xx)?x:xx)}
 	
@@ -305,33 +306,52 @@ UHC = function(){
 			'mlMoMiscHousingExpense': q.boMoMiscHousingExpense,
 			'mlMoTargetPayment': '',
 			'mlRate1to5': q.olRate,
-			'mlPayment1to5': '',
+			'mlMoPayment1to5': '',
 			'mlMonths': q.olMoRemain,
 			'mlChangeMonths': 'no changes',
 			'mlChangeRates': '',
 			'mlChangePayments': '',
 			'mlBalloon': 0.00			
 		};		
-		ml.mlMoTargetPayment = Math.round(ml.mlMoTotalTargetPayment-ml.mlMoMiscHousingExpense);
-		writeML();
-		return true;
+	    ml.mlMoTargetPayment = Math.round(ml.mlMoTotalTargetPayment-ml.mlMoMiscHousingExpense);
+	    ml.mlMoPayment1to5 = getPayment1to5();
+ 	    writeML();
+	    return true;
 	}
 
         function loanIsAffordable(){
-	    return (ml.mlMoPayment1to5 <= ml.mlMoTargetPayment);
+	    // supposed to stop before going under Target
+	    // add small fudge factor to stay close to, but above Target
+	    return (ml.mlMoPayment1to5 <= (ml.mlMoTargetPayment*1.01));
 	}
 	
 	function startAnimation(){
+	    if (animationRunning === 0){ 
 		init();
-	    var frameDelay = (q.frameDelay)? q.frameDelay: 0.2;
-		new PeriodicalExecuter(function(pe){ 
+		if ( loanIsAffordable() ){ 
+		    ml.mlCalculatorStep = "This loan already affordable: Final result -- no modification";
+		    writeML();
+		} else {
+		    newAnimation(); 
+		    animationRunning=1;
+		}
+	    }
+	    return true;
+	}
+
+    function newAnimation(){
+	var frameDelay = (q.frameDelay)? q.frameDelay: 0.2;
+	animationRunning=1;
+	new PeriodicalExecuter(function(pe){ 
 		    if ( loanIsAffordable() ||  (!doAnimationStep())){ 
 			ml.mlCalculatorStep = 'Finished calculations -- Final result';
+			animationRunning=0;
 			pe.stop(); 
 		    }
 		    writeML();
-		}, frameDelay);		
-	}
+		}, frameDelay);	
+	return true;
+    }
 	
 	return {
 		'init': init,
