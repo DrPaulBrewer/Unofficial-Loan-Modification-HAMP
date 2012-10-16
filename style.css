@@ -1,0 +1,12 @@
+input {text-align:right}
+button {background-color:#FFD700; font-size:18px}
+button:hover {background-color:#99FF00}
+#mlCalculatorStep {background-color:#C6EE00}
+#mlFailReason {background-color: #FF0000}
+span.colorT1NoPR {color:#4bb2c5}
+span.colorT1WithPR {color:#EAA228}
+span.colorT1WithPRLV {color:#c5b47f}
+span.colorT2NoPR {color:#000080}
+span.colorT2WithPR {color:#008000}
+div.hampGraph {height:400px; width:800px}
+

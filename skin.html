@@ -4,7 +4,13 @@
 <meta charset="utf-8">
 <!-- Unofficial HAMP Loan Modification Calculator (c) 2012 Dr Paul Brewer  -->
 <!-- This software comes with NO WARRANTY OF ANY KIND. -->
-<!-- This version: May 2012 -->
+<!-- This version: Oct 2012 -->
+<!-- License: GNU GPL v2 -->
+<!-- Note:  You may NOT copy this website into your own, tweak it a bit, and claim copyright on the result -->
+<!-- YOU MAY ONLY DO THE THINGS PERMITTED IN THE GNU GENERAL PUBLIC LICENSE -->
+<!-- Change in Sept/Oct 2012 -->
+<!-- Added HAMP Tier 2, Sensitivity Graph, Schedule of Payments -->
+<!-- Changes in May 2012 -->
 <!-- Added housing expenses line to calculation -->
 <!-- Added Principal Reduction and Lenders' variation to calculation -->
 <!-- Reviewed MHA Handbook v3.3 and made several small changes to match procedures -->
@@ -13,13 +19,13 @@
 <!-- and end users must accept all risks of using the software. -->
 
 <!-- I hereby license my original work in this file to the public under -->
-<!-- Free Software Foundation's GNU General Public License version 3 -->
+<!-- Free Software Foundation's GNU General Public License version 2 -->
 <!--                                               -->
 <!-- The full text of this license can be found at -->
-<!-- http://www.gnu.org/licenses/gpl-3.0.txt -->
+<!-- http://www.gnu.org/licenses/gpl-2.0.txt -->
 <!--                                         -->  
 <!-- There is a public syndication link (an IFRAME) to Freddie Mac data -->
-<!-- at about line 80. That code is distributed under the doctrine of -->
+<!-- That code is distributed under the doctrine of -->
 <!-- fair use and Freddie's explicit permission from its website and -->
 <!-- therefore that portion of the code and data is not licensed by the GPL -->
 <!-- but has been included in this file and will be removed from future -->
@@ -29,32 +35,47 @@
 <!-- drpaulbrewer ( gmail ) -->
 
 <title>The Unofficial HAMP Loan Modification Calculator</title>
-<style type="text/css">
-input {text-align:right}
-button {background-color:#FFD700; font-size:18px}
-#mlCalculatorStep {background-color:#EEC600}
-</style>
-<script  src="http://ajax.googleapis.com/ajax/libs/prototype/1.7.0.0/prototype.js"></script>
-<script  src="UnofficialHampLib2.js"></script>
+<link rel=StyleSheet href="style.css" type="text/css" />
+<link rel="StyleSheet" type="text/css" href="jquery.jqplot.css" />
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
+<script language="javascript" type="text/javascript" src="jquery.jqplot.min.js"></script>
+<script src="underscore-min.js"></script>
+<script src="TVM.js"></script>
+<script src="UnofficialHampLib3.js"></script>
 <script>
 function loadCalculator() 
-{ noFrames(); };
+{ $('#skipDiv, #popupDiv, #Graph1, #GraphAll, #Feedback').hide(); };
 </script>
 </head>
 <body onLoad='loadCalculator();'>
-<h1>The Unofficial HAMP Loan Modification Calculator v2.0</h1>
+<h1>The Unofficial HAMP Loan Modification Calculator v2.5-beta</h1>
+<noscript><h2>OH, NO! The calculations require JavaScript, but JavaScript is TURNED OFF.</h2>
+<h3>Ask your favorite computer expert how to turn JavaScript on, or please use a different computer -- Sorry... </h3>
+</noscript>
 <ul>
-<li>All results are provided <b>completely free of charge</b>. Free. $0.00. Nada. Use "www.armdisarm.com" or "www.unofficialhampcalculator.com". Please beware of ripoffs!</li>
-<li>Calculations are based on independent research of public documents describing HAMP loan modification procedures, particularly <a target=_blank href="./documents/mhahandbook33.pdf">The MHA Handbook v3.3</a></li>
-<li>This unofficial calculator is not associated with the government or any bank and has not been independently reviewed, certified, or tested. </li>
-<li>Computer experts or enthusaists may examine the calculator program's source code, which I make available under the GNU General Public License. </li>
-<li>The software is offered for your free use WITHOUT WARRANTY OF ANY KIND and you agree that ALL USE IS AT YOUR OWN RISK</li> 
-<li>Privacy policy: To protect your privacy, the calculator does not ask for personally identifying information.  Javascript performs the calculations on your computer web browser, not our server. The loan INPUTS data are not recorded and exist only on your computer. Items that are logged for understanding the audience include: ip address, city, state or country, type of web browser. </li>  
-<li>This version: May 19, 2012</li>
+<li><b>All calculations are provided completely free of charge</b>. Free. $0.00. Nada.
+</li>
+<li>Please <b>beware of scammers and idiots</b> who suggest bizarre schemes like stopping loan payments or signing away your home and leasing it back. </li>
+<li><b>I do not provide personalized help with loan modifications.</b> Free help is available from the governments toll free numbers listed at www.makinghomeaffordable.gov  </li>
+<li><b>This unofficial calculator is not associated with the government or any bank </b>. Calculations are based on independent research of public documents describing HAMP loan modification procedures. Docs can be downloaded below.
+</li>
+<li>The calculator is implemented in 100% javascript and may be examined at the <a href="http://github.com/DrPaulBrewer/Unofficial-Loan-Modification-HAMP/tree/v2.0">source code repository</a>. This code is available under the GNU General Public License.</li>
+<li>This free software is <b>WITHOUT WARRANTY OF ANY KIND</b> and you agree that <b>ALL USE IS AT YOUR OWN RISK</b>.  </li>
+<li>Calculations shown here may differ from those provided elsewhere for many reasons. Never make public accusations of fraud where a mistake, or different inputs, might also provide an explanation. </li> 
+<li><b>Privacy policy: Your name, email, or other personal information is never needed for calculations. </b>Javascript performs the calculations on your computer web browser, not on our server -- therefore calculator inputs and outputs exist only on your computer and are never recorded on our server or transmitted across the internet. By visiting, you agree our web server may record standard technical information useful for measuring audience statistics and resolving technical issues and that Google Analytics may use their tracking cookies and other technologies to record and provide audience statistics.</li>
+<li>This version: Oct 16, 2012</li>
 </ul>
-<p>Web sites for official information include: <a target=_blank href="http://makinghomeaffordable.gov">makinghomeaffordable.gov</a> -- <a target=_blank href="http://www.fanniemae.com">Fannie Mae</a> -- <a target=_blank href="http://www.freddiemac.com">Freddie Mac</a></p>
+<p>Web sites for official information include: <a target=_blank href="http://makinghomeaffordable.gov">makinghomeaffordable.gov</a> -- <a target=_blank href="http://www.fanniemae.com">Fannie Mae</a> (<a href="https://www.efanniemae.com/sf/servicing/pdf/loanworkoutfactsheet.pdf" target=_blank>loan workout programs</a>) -- <a target=_blank href="http://www.freddiemac.com">Freddie Mac</a> -- <a target=_blank href="http://www.sigtarp.gov">sigtarp.gov</a> -- 
+<a target=_blank href="http://keepyourhomecalifornia.org">Keep Your Home CA</a>
+</p>
+</p>
+<p>Cheating? Fraud?  
+<a href="https://independentforeclosurereview.com/" target=_blank> Independent Foreclosure Review (ends Dec 31, 2012) </a> -- <a href="https://www.mortgageoversight.com" target=_blank>Office of Mortgage Settlement Oversight</a> --
+<a href="http://preventloanscams.org" target=_blank>preventLoanScams.org</a>
+</p>
+<hr> 
 <h2>Inputs</h2>
-<table>
+<table id="InputsTable">
 <tr>
 <td>
 <input type=text name=olUnpaid id=olUnpaid value=280000 size=8 />
@@ -70,21 +91,31 @@ Max Eligibility: typically $729750
 <td>Market Value, i.e. home value if sold in todays marketplace</td>
 </tr>
 <tr>
+<td> 
+<select name="poHampTier" id="poHampTier" required=1>
+<option value=1>HAMP Tier 1</option>
+<option value=2>HAMP Tier 2</option>
+</select>
+</td>
+<td>
+Procedure to Calculate Loan Modification. Choose "Tier 1" or "Tier 2". Borrowers who fail HAMP Tier 1 can be considered for HAMP Tier 2. 
+</td>
+</tr>
+<tr>
 <td><input type=checkbox name=poDoPR id=poDoPR checked=1 value=cb size=8 /></td>
-<td>Calculate Principal Reduction.</td>
+<td>Calculate Principal Reduction. Uncheck this box to calculate without PR. <br/> In opposition to principal reduction, on July 31, 2012 Fannie Mae/Freddie Mac's acting director released a <a target=_ href="./documents/PFStatement73112.pdf">statement</a>, <a target=_ href="./documents/PF_FHFApaper73112.pdf"> research paper</a>, and <a target=_ href="./documents/PF_TechApp73112.pdf">technical appendix</a>.</td>
 </tr>
 <tr>
 <td><input type=checkbox name=poDoLenderVariation id=poDoLenderVariation checked=1 value=cb size=8 /></td>
 <td>Calculate Lender's Variation. 
-MHA Handbook v3.3, 6.4.3, allows lenders to lengthen loan before reducing rates <br/>
-whenever the forgiven principal exceeds 5% of the unpaid balance
+MHA Handbook v3.3(sect 6.4.3) and v4.0(6.4.4) allows lenders to lengthen loan before reducing rates whenever the forgiven principal exceeds 5% of the unpaid balance
 </td>
 <tr>
 <td>
 <input type=text name=boMoGrossIncome id=boMoGrossIncome value=4000 size=8 />
 </td>
 <td>Borrowers combined Monthly Gross Income<br />
-include all wages, retirement, rental or investment income, before deductions
+include all work, retirement, investment or other income, before deductions
 </td>
 </tr>
 <tr>
@@ -110,7 +141,7 @@ include property taxes, hazard and flood Insurance, HOA fees
 </tr>
 <tr>
 <td>
-<input type=text name=fmCap id=fmCap value=3.80 size=8 />
+<input type=text name=fmCap id=fmCap value=3.50 size=8 />
 </td>
 <td>
 Freddie Mac 30YR FRM Avg rate in %<br />
@@ -118,18 +149,29 @@ Please re-enter by hand from the table below:
 </td>
 </tr>
 </table> 
-<p>freddie mac iframe goes here
-see link below to add back into the site</p>
+<!-- BEGIN FREDDIE MAC IFRAME CODE (not GPL) -->
+<iframe
+  style="overflow:hidden; border: 0px"
+  SRC="http://www.freddiemac.com/pmms/pmmsthick.html"
+  TITLE="Freddie Mac Weekly PMMS"
+  width="210"
+  height="160"
+>
+</iframe>
 <p style="font-size:10px">
 Freddie Mac copyrighted loan market data provided "as is", under a public syndication policy of Freddie Mac and with no warranty of any kind. 
 <a target=_blank href="http://www.freddiemac.com/pmms/syndication/how_to.html">See how to add Freddie Mac data to your website</a>
 </p>
+<!-- END FREDDIE MAC IFRAME CODE (not GPL) -->
+<p>
 <button onClick="UHC.startAnimation();">Click to Begin Calculation</button> 
- Privacy note: No data is transferred. Calculation occurs within your web browser.
+ Privacy note: No data is transferred. Calculation occurs within your web browser. 
+</p>
 <div id=Outputs>
 <hr>
 <h2>Outputs</h2>
-<h3><span id="mlCalculatorStep"></span></h3>
+<h3><span id="mlCalculatorStep"></span> <span id="mlFailReason"></span></h3>
+<div id="skipDiv"><button id="skipButton" onClick="UHC.skipToEnd();">Click To Skip To Final Result</button></div>
 <table border=1>
 <tr>
 <td>
@@ -198,22 +240,114 @@ New Monthly Payments ($) beginning on these months
 </tr>
 <tr>
 <td>
-Balloon payment at end of loan
+Balloon payment at end of loan (suggested max: $<span id=mlBalloonMax></span>)
 </td>
 <td>
 $<span id=mlBalloon></span>
 </td>
 </tr>
+<tr>
+<td>
+Total of Loan Payments
+</td>
+<td>
+$<span id=mlTotalPayments></span>
+</td>
+</tr>
 </table>
+<div id="popupDiv"><button onClick="UHC.popupScheduleOfPayments();">Click to Popup Schedule Of Payments in New Window</button></div>
 <p style="font-size:10px">These results are provided "as-is" and with no warranty of any kind. <em>Procedures and calculations are subject to change and should not be relied upon for any particular case.  Actual results may vary. If you need advice specific to your case, please consult a legal or financial professional. 
 </em></p>
 </div>
-<hr>
+<hr />
+<div id="Graph1Controls">
+<h2>Sensitivity Analysis</h2>
+<p>
+This tool does multiple calculations, then graphs the results.  
+<ol>
+<li>Up top, run a calculation to get a "base" result</li>
+<li>Here, tell it what to vary and what to monitor</li>
+<li>Repeat #2 until you are satisfied you understand what is happening. </li>
+</ol>
+Requires a modern web browser to work properly (Firefox 3.5+, Safari 4+, Chrome 8.0+, IE 9+)<br />
+On Smartphones/Tablets show only <u>single</u> outputs, on "Main 7" it may hang.
+</p>
+<p>
+<input type=checkbox name="gcVaryRules" id="gcVaryRules" checked=1 value=cb onchange="$('#graph1Legend').toggle(); " />Vary Rules 
+<input type=checkbox name="gcIgnoreFail" id="gcIgnoreFail" value=cb />Include "bad" mods
+</p>
+<p>
+Vary 
+<select id="gcX" required=1 onChange="hampGraph.PopulateXLimits();">
+<option value="boMoGrossIncome">Borrower Mo Gross Income</option>
+<option value="olHomeMarketValue">Home Market Value</option>
+<option value="fmCap">Freddie Mac 30YR FRM Rate (%)</option>
+<option value="olUnpaid">Unpaid Loan Balance</option>
+<option value="boMoMiscHousingExpense">Misc Mo Housing Expense</option>
+<option value="olMoRemain">Months Remaining on Loan</option>
+<option value="olRate">Current Interest Rate for Loan (%)</option>
+</select>
+ From 
+<input type=text name="gcFrom" id="gcFrom" size=8 />
+ To 
+<input type=text name="gcTo" id="gcTo" size=8 />
+ Show
+<select id="gcY" required=1>
+<option value="almostEverything">The Main 7 Outputs</option>
+<option value="mlTotalPayments">Total of Loan Payments</option>
+<option value="mlPR">Principal Reduction</option>
+<option value="mlLTV">new LTV (%)</option>
+<option value="mlUnpaid">new Unpaid Balance</option>
+<option value="mlRate1to5">Modified Interest Rate first 5 yr</option>
+<option value="mlMoPayment1to5">Modified Monthly Payment first 5 yr</option>
+<option value="mlMonths">Length of Modified Loan (months)</option>
+<option value="mlBalloon">Balloon payment at end of loan</option>
+</select>
+ <button id="Graph1Button" onClick="hampGraph.Create(); ">Create Graph</button>
+</p>
+</div>
+<div id="graph1Legend">
+colors for Tier 1 Calculations: 
+<span class="colorT1NoPR">No Principal Reduction</span>, 
+<span class="colorT1WithPR">With Principal Reduction</span>, 
+<span class="colorT1WithPRLV">With PR + Lender's Variation</span>
+<br />
+colors for Tier 2 Calculations:
+<span class="colorT2NoPR">No Principal Reduction</span>, 
+<span class="colorT2WithPR">With Principal Reduction</span>
+</div>
+<div id="Graph1" class="hampGraph" style="height:400px;width:800px; "></div>
+<div id="GraphAll">
+  <div id="GraphAll1" class="hampGraph"></div>
+  <p><span id="GraphAll1Title" ></span></p>
+  <hr />
+  <div id="GraphAll2" class="hampGraph"></div>
+  <p><span id="GraphAll2Title" "></span></p>
+  <hr />
+  <div id="GraphAll3" class="hampGraph"></div>
+  <p><span id="GraphAll3Title" ></span></p>
+  <hr />
+  <div id="GraphAll4" class="hampGraph"></div>
+  <p><span id="GraphAll4Title" ></span></p>
+  <hr />
+  <div id="GraphAll5" class="hampGraph"></div>
+  <p><span id="GraphAll5Title" ></span></p>
+  <hr />
+  <div id="GraphAll6" class="hampGraph"></div>
+  <p><span id="GraphAll6Title" ></span></p>
+  <hr />
+  <div id="GraphAll7" class="hampGraph"></div>
+  <p><span id="GraphAll7Title"></span></p>
+  <hr />
+</div>
+<p style="font-size:10px">
+Graphs utilize <a href="http://www.jqplot.com" target=_blank>jqPlot</a>, free plotting software from Chris Leonello, distributed under the GPLv2 License
+</p>
 <hr>
 <div id="Details">
 <div id="Steps">
 <h2>Steps for HAMP calculations</h2>
-These four steps explain what the Unofficial HAMP Calculator is supposed to do. When you push the "click to calculate" button, these steps guide the animation of the intermediate results listed as Outputs. The intermediate calculations continue, using each step in order, until the monthly payment reaches the affordability goal. See <a target=_blank href="./documents/SpecialDirective0901.pdf">US Treasury Supplemental Directive 09-01: Introduction of the Home Affordable Modification Program</a>, pages 8-10.  
+These steps explain what the Unofficial HAMP Calculator is supposed to do. When you push the "click to calculate" button, these steps guide the animation of the intermediate results listed as Outputs. The intermediate calculations continue, using each step in order, until the monthly payment reaches the affordability goal. The first version of the waterfall procedure had fewer steps -- but these steps have been kept in later versions -- see  <a target=_blank href="./documents/SpecialDirective0901.pdf" >US Treasury Supplemental Directive 09-01: Introduction of the Home Affordable Modification Program</a>, pages 8-10. Later rule changes added the steps for principal reduction and lender's variation, and then HAMP Tier 2. See <a target=_blank href="./documents/mhahandbook33.pdf" >The MHA Handbook v3.3</a> and <a target=_blank href="./documents/mhahandbook40.pdf">The MHA Handbook v4.0</a>
 <ol>
 <li><em>Capitalize accrued interest and certain costs. To do this, make sure the unpaid balance includes all unpaid interest and other fees that can be assessed against this loan.  Do not include late fees in the unpaid balance. </em></li>
 <li><em>Reduce principal, if principal reduction is offered.  This is a new step, part of the "principal reduction alternative".</em></li>
@@ -223,19 +357,14 @@ These four steps explain what the Unofficial HAMP Calculator is supposed to do. 
 </li>
 <li><em>As if things weren't complicated or tedious enough already, if the principal was reduced by 5% or more the lender is allowed to reverse the order of the reduce rate and term extension steps.  The lender can increase the time to pay to 40 years BEFORE reducing the rate.  </em></li>
 <li>
-<em>If necessary, provide for non interest-bearing principal forebearance to achieve the target monthly mortgage payment ratio, i.e. a non-interest bearing balloon payment. </em>
+<em>If necessary, provide for non interest-bearing principal forebearance to achieve the target monthly mortgage payment ratio, i.e. a non-interest bearing balloon payment. Under the MHA 4.0 documentation, the suggested maximum limit for principal forebearance is the maximum of 30% of the unpaid balance or the amount needed to achieve 100% LTV (i.e. unpaid balance - market value) and is reduced by any initial principal reduction.</em>
 </li>
+<li>Finally: Try Tier 2, a new formula -- if the Tier 1 modification fails </li>
 </ol>
 </div>
-<div id=DetailsStep1>
 </div>
-<div id=DetailsStep2>
-</div>
-<div id=DetailsStep3>
-</div>
-<div id=DetailsStep4>
-</div>
-</div>
+<h3>What is HAMP Tier 1 and Tier 2?</h3>
+<p><b>NEW</b> Tier 2 is a new calculation for those who fail Tier 1, and was rolled out in 2012. Both Tier 1 and Tier 2 are still in use. Borrowers who do not qualify for  Tier 1, or who defaulted on Tier 1, are evaluated for Tier 2 which is a similar but different formula.  Tier 2 operates as follows:  the interest rate is the FRM 30 YR AVG rate for the entire loan, the loan is lengthened to 40 years, and there would be either a principal forgiveness or a balloon. There are fewer adjustable or optional components to the formula, no "search", no dozens of small steps. The mathematics is less sensitive to income. The payments may also be a higher percentage of income in Tier 2. A Tier 2 modification is not indicated if the modified monthly payment does not fit in the target monthly payment window (this is tested here in the unofficial calculator) or if it is not at least 10% lower than the current loan payment (this is currently untested in the unofficial calculator). The NPV test can still veto a Tier 2 modification.</p>
 <h3>In some cases, do HAMP's rates and payments increase after 5 years?</h3>
 <p>Yes, and the calculator tries to calculate this effect. It is a step in the HAMP directive and it has been programmed into the unofficial calculator. Page 9 "Step 2" of Directive 09-01 requires rates that are sufficiently low to rise after 5 years. The rate, of course, affects the payment.  Rates rise when they are below the Freddie Mac 30 YR rate that was in effect when the loan modification agreement was prepared. Thats why the current Freddie Mac 30 YR rate is shown and then asked for in the Inputs section of the unofficial calculator. </p>
 <h3>NPV or Net Present Value -- A final step that can veto the loan mod</h3>
@@ -243,8 +372,15 @@ These four steps explain what the Unofficial HAMP Calculator is supposed to do. 
 <p>The calculation lenders make to evaluate the value of the modified loan is called an "NPV test" or Net Present Value, a method of converting the future values -- the promises a homeowner makes in the modified loan -- into present value, or money now.  A homeowner who wants to keep the home generally would want/hope the NPV of the modified loan is more than the amount the lender could realize in money now through forcing a sale of the home. </p>
 <p>At this time, an independent "unofficial" approach to this NPV calculation is beyond the scope of this website. But you can use a free calculator recently released by the government. </p>
 <p> Treasury and HUD have announced a public calculator for this NPV at <a href="https://checkmynpv.com">https://CheckMyNPV.com</a>.  </p>  
-<p>
-Unofficial HAMP Calculator (C) 2010 <a target=_blank href="http://www.linkedin.com/in/drpaulbrewer">Dr Paul Brewer</a> -- <a target=_blank href="license.html">Software license information</a>
+<p> Also, <a target=_blank href="http://www.sigtarp.gov">SIGTARP (Special Inspector General for Troubled Asset Relief Programs)</a> has issued a <a target=_blank href="./documents/sigtarp_npv_report.pdf">public document entitled "The Net Present Value Test's Impact On The Home Affordable Modification Program"</a>. The "Conclusions"/"risk premium" subsection on p.16-17 has some interesting details about how some of the major HAMP servicers adjusted a variable related to risk in the NPV test (including BofA, Wells Fargo, JPMorgan Chase, Fannie/Freddie) and its effect on eligibility...  Whether you support or are opposed to the idea of helping distressed homeowners, it makes for some interesting reading.  
 </p>
+<h3>Loan Mod Hell</h3>
+<p>It has been reported that some banks repeated asked applicants for the same information over and over again.  There have also been reports of dual tracking of foreclosures alongside modifications, so that when the modification is finally denied the foreclosure will follow shortly thereafter. One hopes these practices will be curtailed (there may be a law in California going into effect Jan 2013). Search for "loan mod hell" or "dual tracking" at google or youTube for more information. </p>
+<p>
+Unofficial HAMP Calculator (C) 2010, 2012- 
+<a target=_blank href="http://www.linkedin.com/in/drpaulbrewer" >Dr Paul Brewer</a>
+ -- <a target=_blank href="license.html">Software license information</a>
+</p>
+<hr />
 </body>
 </html>

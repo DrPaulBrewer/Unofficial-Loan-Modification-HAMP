@@ -1,7 +1,18 @@
 Unofficial HAMP Calculator
-(c) Dr Paul Brewer 2010
-License: Free Software Foundation's General Public License (GPL) version 3
+(c) Dr Paul Brewer 2010, 2012-
+License: Free Software Foundation's General Public License (GPL) version 2
+or any later version of the FSF General Public License
 
+Please note that the License to use the software contains a warranty disclaimer
+so that THERE IS NO WARRANTY FOR THIS SOFTWARE and ALL USE IS AT YOUR OWN RISK. 
+
+Such a disclaimer is common industry practice with respect to free software.
+
+Note:  Dr Paul Brewer is an independent economist and did not work
+for the United States Government or any bank during the creation of this
+software.  Also, no government or bank officials were involved in the creation
+or testing of the software.  The algorithms involved are worthy of independent
+study, and the Unofficial HAMP Calculator represents such an independent study.
 
 GENERAL BACKGROUND
 During the recent credit crisis and recession in the United States, many
@@ -24,14 +35,8 @@ an existing mortgage.
 The full details of this algorithm are beyond the scope of this version
 of the README file.  
 
-The algorithm is interesting and worthy of independent study
-The UnofficialHAMPCalculator represents such an independent study.
 
-I, Dr Paul Brewer, am a private economist with no ties to the US Government
-or the decision makers who created and implemented the HAMP program. Let's
-make that part clear.  
-
-HAMP ALGORITHM
+AN INTRODUCTION TO THE HAMP ALGORITHM
 
 Keep in mind that this is only one version of the procedure, and not
 the whole procedure.  The policy must be considered as subject to change.
@@ -59,16 +64,26 @@ to forgive some of this principal, but is not required to.
 
 UNOFFICIAL CALCULATOR IMPLEMENTATION AND USAGE
 
-The calculator is implemented primarily in two files and uses the 
-prototype.js Javascript extension library -- a copy of which is included.
+The calculator uses the  folowing javascript extension libraries 
+written by others:
 
-The skin.html file contains the "skin" of the calculator.
+JQuery (no copy needed, html includes the Google public CDN copy)
+Underscore.js (copy provided, distrubuted under the MIT License)
+JQPlot (copies provided, distributed under the GNU GPL v2 License)
 
-The UnofficialHampLib2.js file contains the Javascript program code to implement
-the calculator.  
+The skin.html file contains the "skin" of the calculator.  If you want
+to test your download of the calculator, open "skin.html" in firefox
+or google chrome.
 
-I am making these files are made available under the Free Software Foundation's 
-GNU General Public License version 3.0. However, that does not mean anyone
+The UnofficialHampLib3.js file contains the Javascript program code to implement
+the calculator. 
+
+The TVM.js file contains a library of mathematical Time Value of Money and
+Loan functions.
+
+I am making these files available under the Free Software Foundation's 
+GNU General Public License version 2.0 (or any subsequent version of the license
+as released by the Free Software Foundation). However, that does not mean anyone
 can do anything with the files.  Please read the license to understand
 what is permitted. For example, you may NOT modify this calculator and turn
 the result into proprietary software where you control who can further
@@ -84,7 +99,7 @@ prototype.
 
 I believe people have a right to get independent information about
 how their mortgages may be modified and I have a website, ArmDisarm.com, 
-that I am interested in devoting to benevolent entrepreneurship in this area.
+devoted to benevolent entrepreneurship in this area.
 
 
 
